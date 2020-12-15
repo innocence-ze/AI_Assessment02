@@ -55,7 +55,7 @@ public class Bird : EvolutionPlayer
         inputList = new double[2];
 
         allY = maxFlyRange - minFlyRange;
-        allX = GameManager.Singleton.pipeInitialX - startPosX;
+        allX = BirdGameManager.Singleton.pipeInitialX - startPosX;
     }
 
     // Update is called once per frame
@@ -131,12 +131,12 @@ public class Bird : EvolutionPlayer
 
     public override double[] GetInputs()
     {
-        if(GameManager.Singleton.activePipeList.Count > 0)
+        if(BirdGameManager.Singleton.activePipeList.Count > 0)
         {
-            Transform p = GameManager.Singleton.activePipeList[0].transform;
+            Transform p = BirdGameManager.Singleton.activePipeList[0].transform;
             if(p.position.x < transform.position.x)
             {
-                p = GameManager.Singleton.activePipeList[1].transform;
+                p = BirdGameManager.Singleton.activePipeList[1].transform;
             }
 
             Vector2 temp = p.position - transform.position;

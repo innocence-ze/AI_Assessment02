@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameManager : EvolutionManager
+public class BirdGameManager : EvolutionManager
 {
-    private static GameManager gm = null;
+    private static BirdGameManager gm = null;
     
-    public static GameManager Singleton
+    public static BirdGameManager Singleton
     {
         get
         {
             if(gm == null)
             {
-                gm = FindObjectOfType<GameManager>();
+                gm = FindObjectOfType<BirdGameManager>();
                 if(gm == null)
                 {
                     throw new System.Exception("Without a game manager");

@@ -13,22 +13,22 @@ public class EvolutionPlayer : MonoBehaviour
 
     public virtual double[] GetInputs()
     {
-        throw new System.Exception();
+        return null;
     }
 
     public virtual void UseOutputs(double[] outputs)
     {
-        throw new System.Exception();
+
     }
 
     public virtual void UpdateFitness()
     {
-        throw new System.Exception();
+
     }
 
     public virtual void RST()
     {
-        throw new System.Exception();
+
     }
 
     // Update is called once per frame
