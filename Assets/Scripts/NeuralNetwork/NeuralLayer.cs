@@ -1,35 +1,36 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class NeuralLayer
 {
     public List<Neural> neurals;
 
-    public NeuralLayer(int neuralNum, int weightNum, bool bOutput)
+    public NeuralLayer(int neuralNum, int weightNum, bool isOutput)
     {
-        neurals = new List<Neural>(neuralNum);
-        for(int i = 0; i < neuralNum; i++)
+        neurals = new List<Neural>();
+        for (int i = 0; i < neuralNum; i++)
         {
-            neurals.Add(new Neural(i, bOutput, weightNum));
+            neurals.Add(new Neural(i, weightNum, isOutput));
         }
     }
 
     public void Execute(double[] inputs)
     {
-        for(int i = 0; i < neurals.Count; i++)
+        foreach (var neural in neurals)
         {
-            neurals[i].Execute(inputs);
+            neural.Execute(inputs);
         }
     }
 
     public double[] GetValues()
     {
-        //+1 because of bias
         double[] res = new double[neurals.Count + 1];
-        for(int i = 0; i <neurals.Count; i++)
+        for (int i = 0; i < neurals.Count; i++)
         {
             res[i] = neurals[i].value;
         }
-        res[neurals.Count] = 1;
+        res[res.Length - 1] = 1;
         return res;
     }
 }

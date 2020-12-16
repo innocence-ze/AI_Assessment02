@@ -1,145 +1,154 @@
-﻿
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class EvolutionManager : MonoBehaviour
 {
     /// <summary>
-    /// the list of main player in current generation, whose count equals population,
-    /// and it needs to reset in every new generation
-    /// </summary>
-    [HideInInspector]
-    public List<EvolutionPlayer> epList;
-
-    /// <summary>
     /// used to create neural network
     /// </summary>
     public int[] layerShape;
     /// <summary>
-    /// the list of neural network in current generation, whose count equals population,
-    /// and it needs to reset in every new generation
+    /// the number of population in each generation of ga, have to set at begining
     /// </summary>
-    public List<NeuralNetwork> nnList;
+    public int populationSize;
+
+    /// <summary>
+    /// the prefab of main player
+    /// </summary>
+    public GameObject agentPrefab;
+    /// <summary>
+    /// the root of prefab to attatch
+    /// </summary>
+    public Transform agentsParent;
+
+    /// <summary>
+    /// the genetic algorithm used in this project, only set at begining
+    /// </summary>
+    private GeneticAlgorithm ga;
 
     /// <summary>
     /// chromosome list of current generation, whose count equals population,
     /// and it needs to reset in every new generation
     /// </summary>
-    public List<Chromosome> chroList;
+    private List<Genome> genomeList = new List<Genome>();
     /// <summary>
-    /// the genetic algorithm used in this project, only set at begining
+    /// the list of neural network in current generation, whose count equals population,
+    /// and it needs to reset in every new generation
     /// </summary>
-    public GeneticAlgorithm ga;
+    private List<NeuralNetwork> nnList = new List<NeuralNetwork>();
     /// <summary>
-    /// the number of population in each generation of ga, have to set at begining
+    /// the list of main player in current generation, whose count equals population,
+    /// and it needs to reset in every new generation
     /// </summary>
-    public int population;
+    private List<Agent> agentList = new List<Agent>();
 
-    /// <summary>
-    /// the prefab of main player
-    /// </summary>
-    public GameObject mpPrefab;
-    /// <summary>
-    /// the root of prefab to attatch
-    /// </summary>
-    public Transform mpParentRoot;
-
-    /// <summary>
-    /// whether load weights from local to initial the neural network 
-    /// </summary>
-    public bool bLoadWeights;
-    /// <summary>
-    /// the path of local to load the weight for neural network
-    /// </summary>
+    public bool loadWeights;
     public string weightPath;
-
-    // Start is called before the first frame update
-    protected virtual void Start()
+    void Start()
     {
-        InitialManager();
+        InitTest();
     }
 
-    // Update is called once per frame
-    protected virtual void Update()
+    void Update()
     {
-        UpdateManager();  
+        RunTest();
     }
 
-    void InitialManager()
+    void SaveBest()
     {
-        InitialGameWorld();
-        epList = new List<EvolutionPlayer>();
-        nnList = new List<NeuralNetwork>();
-        chroList = new List<Chromosome>();
-        ga = new GeneticAlgorithm(population);
-        for (int i = 0; i < population; i++)
+        NeuralNetwork bestNn = null;
+        double maxFit = -9999;
+        foreach (var item in agentList)
+        {
+            if (item.ge.fitness > maxFit)
+            {
+                bestNn = item.nn;
+                maxFit = item.ge.fitness;
+            }
+        }
+        if (bestNn != null)
+        {
+            bestNn.SaveWeights(weightPath);
+        }
+    }
+
+    void InitTest()
+    {
+        InitWorld();
+        ga = new GeneticAlgorithm(populationSize);
+        for (int i = 0; i < populationSize; i++)
         {
             NeuralNetwork nn = new NeuralNetwork(layerShape);
-            if (bLoadWeights)
+            if (loadWeights)
             {
                 if (!nn.LoadWeights(weightPath))
                 {
-                    throw new System.Exception("Please input correct path of weight");
+                    Debug.LogError("please use correct path");
                 }
             }
             else
             {
-                nn.SetWeightsRandom();
+                nn.RandomWeights();
             }
-            Chromosome chro = new Chromosome(nn.GetWeights(), 0, nn.crossoverPoint);
-            EvolutionPlayer mp = Instantiate(mpPrefab, mpParentRoot).GetComponent<EvolutionPlayer>();
-            mp.SetInfo(nn, chro);
-            mp.RST();
+
+
+            Genome ge = new Genome(nn.GetWeights(), 0, nn.splitPoints);
+
+            Agent ac = Instantiate(agentPrefab).GetComponent<Agent>();
+            ac.transform.SetParent(agentsParent);
+            ac.SetInfo(nn, ge);
+            ac.Reset();
 
             nnList.Add(nn);
-            chroList.Add(chro);
-            epList.Add(mp);
+            genomeList.Add(ge);
+            agentList.Add(ac);
         }
     }
 
-
-    void UpdateManager()
+    void RunTest()
     {
-        if (IsAllDie())
+        if(CheckAllDie())
         {
-            ResetGameWorld();
-            GetNextGeneration();
+            ResetWorld();
+            FinishGA();
         }
     }
 
-    private void GetNextGeneration()
+    void FinishGA()
     {
-        chroList = ga.Execute(chroList);
-        for(int i = 0; i< population; i++)
+        SaveBest();
+        List<double[]> weightsList = ga.Execute(genomeList);
+        for (int i = 0; i < weightsList.Count; i++)
         {
-            nnList[i].SetWeights(chroList[i].weights);
-            epList[i].SetInfo(nnList[i], chroList[i]);
-            epList[i].RST();
+            nnList[i].SetWeights(weightsList[i]);
+            agentList[i].nn = nnList[i];
+            genomeList[i] = new Genome(nnList[i].GetWeights(), 0, nnList[i].splitPoints);
+            agentList[i].ge = genomeList[i];
+            agentList[i].Reset();
         }
-
     }
 
-    public virtual bool IsAllDie()
+    public virtual bool CheckAllDie()
     {
-        bool res = true;
-        for(int i = 0; i < epList.Count; i++)
+        bool isAllDie = true;
+        foreach (var t in agentList)
         {
-            if (epList[i].gameObject.activeSelf)
+            if (t.gameObject.activeSelf)
             {
-                res = false;
+                isAllDie = false;
                 break;
             }
-            
         }
-        return res;
+        return isAllDie;
     }
 
-    public virtual void InitialGameWorld()
+    public virtual void ResetWorld()
     {
 
     }
 
-    public virtual void ResetGameWorld()
+    public virtual void InitWorld()
     {
 
     }
