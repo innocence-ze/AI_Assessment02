@@ -64,21 +64,22 @@ public class Pac : EvolutionPlayer
                 if (hitInfo.transform.CompareTag("Pac"))
                 {
                     inputList.Add(input);
-                    inputList.Add(0);
-                    inputList.Add(0);
+                    inputList.Add(0.0);
+                    inputList.Add(0.0);
                 }
                 else if (hitInfo.transform.CompareTag("Obstacle"))
                 {
-                    inputList.Add(0);
+                    inputList.Add(0.0);
                     inputList.Add(input);
-                    inputList.Add(0);
+                    inputList.Add(0.0);
                 }
                 else if (hitInfo.transform.CompareTag("Food"))
                 {
-                    inputList.Add(0);
-                    inputList.Add(0);
+                    inputList.Add(0.0);
+                    inputList.Add(0.0);
                     inputList.Add(input);
                 }
+                lineList[i].SetPosition(1, hitInfo.point);
             }
             else
             {
@@ -115,7 +116,10 @@ public class Pac : EvolutionPlayer
     public override void RST()
     {
         gameObject.SetActive(true);
-        transform.position = new Vector3(Random.Range(-20f, 20), 0, Random.Range(-20f, 20));
+        PacGameManager.livePac.Add(this);
+        PacGameManager.deadPac.Remove(this);
+
+        transform.position = new Vector3(Random.Range(-20f, 20), 1, Random.Range(-20f, 20));
         fitness = 0;
         t = 0;
     }
@@ -127,6 +131,32 @@ public class Pac : EvolutionPlayer
         if(t > lifeTime)
         {
             gameObject.SetActive(false);
+            PacGameManager.livePac.Remove(this);
+            PacGameManager.deadPac.Add(this);
+        }
+
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Food"))
+        {
+            fitness += 1;
+            other.gameObject.SetActive(false);
+            PacGameManager.showFood.Remove(other.gameObject);
+            PacGameManager.hideFood.Add(other.gameObject);
+        }
+
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Obstacle"))
+        {
+            fitness -= 3;
+            gameObject.SetActive(false);
+            PacGameManager.livePac.Remove(this);
+            PacGameManager.deadPac.Add(this);
         }
     }
 

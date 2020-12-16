@@ -89,6 +89,7 @@ public class EvolutionManager : MonoBehaviour
             Chromosome chro = new Chromosome(nn.GetWeights(), 0, nn.crossoverPoint);
             EvolutionPlayer mp = Instantiate(mpPrefab, mpParentRoot).GetComponent<EvolutionPlayer>();
             mp.SetInfo(nn, chro);
+            mp.RST();
 
             nnList.Add(nn);
             chroList.Add(chro);
