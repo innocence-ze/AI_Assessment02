@@ -7,6 +7,7 @@ TagManager:
   - Obstacle
   - Pac
   - Food
+  - Qiang
   layers:
   - Default
   - TransparentFX

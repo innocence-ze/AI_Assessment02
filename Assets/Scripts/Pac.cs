@@ -20,26 +20,18 @@ public class Pac : Agent
 
     void Start()
     {
-        mat = new Material(Shader.Find("Legacy Shaders/Self-Illumin/Diffuse"));
+        mat = new Material(Shader.Find("Standard"));
         GetComponent<MeshRenderer>().material = mat;
-        while (true)
-        {
-            Vector3 vc = new Vector3(Random.value, Random.value, Random.value);
-            float a = Vector3.Angle(vc, Vector3.one);
-            float d = Mathf.Sin(a / 180 * Mathf.PI) * vc.magnitude;
-            if (d > 0.8f)
-            {
-                mat.color = new Color(vc.x, vc.y, vc.z);
-                break;
-            }
-        }
+        mat.color = new Color(Random.value, Random.value, Random.value);
+
         for (int i = 0; i < eyeNum; i++)
         {
             LineRenderer lr = new GameObject("line" + i).AddComponent<LineRenderer>();
             lr.transform.SetParent(transform);
             lr.transform.localPosition = Vector3.zero;
             lr.transform.localRotation = Quaternion.identity;
-            lr.SetWidth(0.06f, 0.06f);
+            lr.startWidth = 0.06f;
+            lr.endWidth = 0.06f;
             lr.material = mat;
             lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             lr.receiveShadows = false;
@@ -56,27 +48,26 @@ public class Pac : Agent
             lineList[i].gameObject.SetActive(isDraw);
             lineList[i].SetPosition(0, transform.position);
             Vector3 dir = Quaternion.AngleAxis(dert + i * eyeAngle, transform.up) * transform.forward;
-            RaycastHit hitInfo;
-            if (Physics.Raycast(transform.position, dir, out hitInfo, seeDis))
+            if (Physics.Raycast(transform.position, dir, out RaycastHit hitInfo, seeDis))
             {
                 float pd = Mathf.Pow(1 - hitInfo.distance / seeDis, 2);
                 switch (hitInfo.transform.tag)
                 {
-                    case "Yang":
+                    case "Pac":
                         {
                             inputsList.Add(pd);
                             inputsList.Add(0);
                             inputsList.Add(0);
                             break;
                         }
-                    case "Qiang":
+                    case "Obstacle":
                         {
                             inputsList.Add(0);
                             inputsList.Add(pd);
                             inputsList.Add(0);
                             break;
                         }
-                    case "Dou":
+                    case "Food":
                         {
                             inputsList.Add(0);
                             inputsList.Add(0);
@@ -121,7 +112,9 @@ public class Pac : Agent
     public override void Reset()
     {
         gameObject.SetActive(true);
-        transform.position = new Vector3(Random.Range(-20f, 20f), 0, Random.Range(-20f, 20f));
+        PacEvolutionManager.deadPacList.Remove(this);
+        PacEvolutionManager.livePacList.Add(this);
+        transform.position = new Vector3(Random.Range(-20f, 20f), 1, Random.Range(-20f, 20f));
         transform.rotation = Quaternion.identity;
         fit = 0;
         t = 0;
@@ -133,30 +126,29 @@ public class Pac : Agent
         if (t > lifeTime)
         {
             gameObject.SetActive(false);
+            PacEvolutionManager.deadPacList.Add(this);
+            PacEvolutionManager.livePacList.Remove(this);
         }
     }
 
-    public void OnCollisionStay(Collision c)
+    public void OnCollisionEnter(Collision c)
     {
-        if (c.gameObject.CompareTag("Dou"))
-        {
-            //fit++;
-            //c.transform.position = new Vector3(Random.Range(-20f, 20f), 0, Random.Range(-20f, 20f));
-        }
-        else if (c.gameObject.CompareTag("Qiang") && t > 1)
+        if (c.gameObject.CompareTag("Obstacle") && t > 1)
         {
             fit -= 3;
             gameObject.SetActive(false);
+            PacEvolutionManager.livePacList.Remove(this);
+            PacEvolutionManager.deadPacList.Add(this);
         }
     }
 
-    public void OnTriggerStay(Collider c)
+    public void OnTriggerEnter(Collider c)
     {
-        if (c.gameObject.CompareTag("Dou"))
+        if (c.gameObject.CompareTag("Food"))
         {
             fit++;
-            PacEvolutionManager.showFood.Remove(c.gameObject);
-            PacEvolutionManager.hideFood.Add(c.gameObject);
+            PacEvolutionManager.showFoodList.Remove(c.gameObject);
+            PacEvolutionManager.hideFoodList.Add(c.gameObject);
             c.gameObject.SetActive(false);
         }
     }

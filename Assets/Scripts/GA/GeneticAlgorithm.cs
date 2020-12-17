@@ -57,14 +57,6 @@ public class GeneticAlgorithm
         });
         #endregion
 
-        #region output
-        double totalFit = 0;
-        foreach (var t in parents)
-        {
-            totalFit += t.fitness;
-        }
-        UnityEngine.Debug.Log("Max fitness is: " + parents[parents.Count - 1].fitness + "   avg is: " + totalFit / parents.Count);
-        #endregion
 
         #region adapt negative fitness
         dertFit = parents.Min(a => a.fitness);

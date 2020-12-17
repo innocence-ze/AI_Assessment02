@@ -47,12 +47,12 @@ public class EvolutionManager : MonoBehaviour
     public string weightPath;
     void Start()
     {
-        InitTest();
+        InitialWorld();
     }
 
     void Update()
     {
-        RunTest();
+        UpdateWorld();
     }
 
     void SaveBest()
@@ -73,9 +73,9 @@ public class EvolutionManager : MonoBehaviour
         }
     }
 
-    void InitTest()
+    void InitialWorld()
     {
-        InitWorld();
+        InitialGameWorld();
         ga = new GeneticAlgorithm(populationSize);
         for (int i = 0; i < populationSize; i++)
         {
@@ -106,11 +106,11 @@ public class EvolutionManager : MonoBehaviour
         }
     }
 
-    void RunTest()
+    void UpdateWorld()
     {
         if(CheckAllDie())
         {
-            ResetWorld();
+            ResetGameWorld();
             FinishGA();
         }
     }
@@ -143,12 +143,12 @@ public class EvolutionManager : MonoBehaviour
         return isAllDie;
     }
 
-    public virtual void ResetWorld()
+    public virtual void ResetGameWorld()
     {
 
     }
 
-    public virtual void InitWorld()
+    public virtual void InitialGameWorld()
     {
 
     }
