@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
 
     private static GameManager singleton = null;
 
+    public TMP_Text timeText;
 
     public TMP_Text msgText;
 
@@ -32,7 +33,7 @@ public class GameManager : MonoBehaviour
     {
         var genStr = string.Format("{0:000}", generation);
         var maxStr = string.Format("{0:000}", maxFit);
-        var avgStr = string.Format("{0:000.00}", avgFit);
+        var avgStr = string.Format("{0:00.00}", avgFit);
         msgText.text += " " + genStr + " | " + maxStr + " | " + avgStr + "\n";
     }
 
@@ -56,5 +57,27 @@ public class GameManager : MonoBehaviour
 #else
     Application.Quit();
 #endif
+    }
+
+    public void Restart()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+    }
+
+    void SetTime()
+    {
+        if(PacEvolutionManager.livePacList.Count > 0)
+        {
+            timeText.text = "T: " + string.Format("{0:00.00}", PacEvolutionManager.livePacList[0].t);
+        }
+        else
+        {
+            timeText.text = "T: 00.00";
+        }
+    }
+
+    private void Update()
+    {
+        SetTime();
     }
 }

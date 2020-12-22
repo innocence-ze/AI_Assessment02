@@ -69,7 +69,7 @@ public class EvolutionManager : MonoBehaviour
         }
         if (bestNn != null)
         {
-            bestNn.SaveWeights(weightPath);
+            bestNn.SaveWeights(Application.dataPath + weightPath);
         }
     }
 
@@ -82,7 +82,7 @@ public class EvolutionManager : MonoBehaviour
             NeuralNetwork nn = new NeuralNetwork(layerShape);
             if (loadWeights)
             {
-                if (!nn.LoadWeights(weightPath))
+                if (!nn.LoadWeights(Application.dataPath + weightPath))
                 {
                     Debug.LogError("please use correct path");
                 }

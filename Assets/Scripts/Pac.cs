@@ -14,7 +14,7 @@ public class Pac : Agent
     public bool isDraw;
     public float fit;
     public float lifeTime;
-    private float t;
+    public float t;
     public List<LineRenderer> lineList = new List<LineRenderer>();
     public static Pac bestOne;
 
@@ -111,9 +111,13 @@ public class Pac : Agent
 
     public override void Reset()
     {
-        gameObject.SetActive(true);
-        PacEvolutionManager.deadPacList.Remove(this);
-        PacEvolutionManager.livePacList.Add(this);
+        if (!PacEvolutionManager.livePacList.Contains(this))
+        {
+            gameObject.SetActive(true);
+            PacEvolutionManager.deadPacList.Remove(this);
+            PacEvolutionManager.livePacList.Add(this);
+        }
+
         transform.position = new Vector3(Random.Range(-20f, 20f), 1, Random.Range(-20f, 20f));
         transform.rotation = Quaternion.identity;
         fit = 0;
