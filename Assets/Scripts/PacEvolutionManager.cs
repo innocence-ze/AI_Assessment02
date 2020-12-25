@@ -61,7 +61,7 @@ public class PacEvolutionManager : EvolutionManager
                 totalFit += p.fit;
             }
         }
-        return totalFit / populationSize;
+        return totalFit / (deadPacList.Count + livePacList.Count);
     }
 
     public override bool CheckAllDie()
